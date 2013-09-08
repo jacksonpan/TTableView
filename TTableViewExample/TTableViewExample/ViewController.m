@@ -16,14 +16,29 @@
 }
 @property (nonatomic, strong) IBOutlet TTableView* myTableView;
 @property (nonatomic, assign) ViewCell* currentSelectCell;
+@property (nonatomic, strong) NSMutableArray* dataList;
 @end
 
 @implementation ViewController
 @synthesize myTableView = _myTableView;
 @synthesize currentSelectCell = _currentSelectCell;
+@synthesize dataList = _dataList;
 
 - (void)initUI
 {
+    if(_dataList == nil)
+    {
+        _dataList = [NSMutableArray new];
+        for(int i=0;i<5;i++)
+        {
+            NSMutableArray* rows = [NSMutableArray new];
+            for(int j=0;j<5;j++)
+            {
+                [rows addObject:[NSNull null]];
+            }
+            [_dataList addObject:rows];
+        }
+    }
     __weak ViewController* _self = self;
     
     _myTableView.enableIOS7Style = YES;
@@ -31,11 +46,12 @@
     //[_myTableView setBlockTransform:TTableViewCellTransformFan];
 
     [_myTableView setBlockNumberOfSections:^NSInteger(TTableView *tableView) {
-        return 5;
+        return _self.dataList.count;
     }];
     
     [_myTableView setBlockNumberOfRows:^NSInteger(TTableView *tableView, NSInteger section) {
-        return 5;
+        NSMutableArray* rows = [_self.dataList objectAtIndex:section];
+        return rows.count;
     }];
     
     [_myTableView setBlockCellForRowAtIndexPath:^UITableViewCell *(TTableView *tableView, NSIndexPath *indexPath) {
@@ -67,10 +83,11 @@
 
 - (void)delete:(id)_cell
 {
-    NSIndexPath* indexPath = [(ViewCell*)_cell indexPath];
-        
+    NSIndexPath* indexPath = [self.myTableView indexPathForCell:_cell];
+    NSMutableArray* rows = [self.dataList objectAtIndex:indexPath.section];
+    [rows removeLastObject];
     [_myTableView beginUpdates];
-    [_myTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationLeft];
+    [_myTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
     [_myTableView endUpdates];
 }
 
